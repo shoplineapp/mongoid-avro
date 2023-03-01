@@ -1,0 +1,9 @@
+test:
+  clients:
+    default:
+      database: shopline_test
+      hosts:
+        - localhost:27017
+  options:
+    raise_not_found_error: false
+    belongs_to_required_by_default: false
