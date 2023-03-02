@@ -21,8 +21,16 @@ module Mongoid
                                   when 'Float' then 'float'
                                   when 'BigDecimal' then 'decimal'
                                   when 'Boolean' then 'boolean'
-                                  when 'DateTime', 'Time' then 'datetime'
-                                  when 'Date' then 'date'
+                                  when 'DateTime', 'Time'
+                                    {
+                                      type: 'long',
+                                      logicalType: 'timestamp-millis'
+                                    }
+                                  when 'Date'
+                                    {
+                                      type: 'int',
+                                      logicalType: 'date'
+                                    }
                                   when 'BSON::ObjectId' then 'objectid'
                                   else
                                     # If the type is not recognized, raise an error
