@@ -21,12 +21,14 @@ module Mongoid
                                   when 'Float' then 'float'
                                   when 'BigDecimal' then 'decimal'
                                   when 'Boolean' then 'boolean'
-                                  when 'DateTime, Time' then 'datetime'
+                                  when 'DateTime', 'Time' then 'datetime'
                                   when 'Date' then 'date'
                                   when 'BSON::ObjectId' then 'objectid'
                                   else
                                     # If the type is not recognized, raise an error
-                                    raise ArgumentError, "Unsupported type for avro_format: #{options[:type]}"
+                                    # raise ArgumentError, "Unsupported type for avro_format: #{options[:type]}"
+                                    # fallback to string anyway
+                                    'string'
                                   end
         end
 
