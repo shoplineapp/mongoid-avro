@@ -31,7 +31,7 @@ module Mongoid
                                       type: 'int',
                                       logicalType: 'date'
                                     }
-                                  when 'BSON::ObjectId' then 'objectid'
+                                  when 'BSON::ObjectId' then 'string'
                                   else
                                     # If the type is not recognized, raise an error
                                     # raise ArgumentError, "Unsupported type for avro_format: #{options[:type]}"
