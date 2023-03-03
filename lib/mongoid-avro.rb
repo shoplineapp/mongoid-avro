@@ -20,7 +20,17 @@ module Mongoid
                                   when 'Integer' then 'int'
                                   when 'Float' then 'float'
                                   when 'BigDecimal' then 'decimal'
-                                  when 'Boolean' then 'boolean'
+                                  when 'Boolean', 'Mongoid::Boolean' then 'boolean'
+                                  when 'Money'
+                                    # We must define the money record in first
+                                    {
+                                      type: 'record',
+                                      name: 'Money',
+                                      fields: [
+                                        { name: 'cents', type: 'int' },
+                                        { name: 'currency_iso', type: 'string' }
+                                      ]
+                                    }
                                   when 'DateTime', 'Time'
                                     {
                                       type: 'long',
