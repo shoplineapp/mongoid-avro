@@ -6,10 +6,17 @@ end
 module Mongoid
   module Avro
     extend ActiveSupport::Concern
+    cattr_accessor :avro_namespace
+    cattr_accessor :avro_money_schema
 
-    included do
-      cattr_accessor :avro_schema
-    end
+    MONEY_AVRO_SCHEMA = {
+      type: 'record',
+      name: 'Money',
+      fields: [
+        { name: 'cents', type: 'int' },
+        { name: 'currency_iso', type: 'string' }
+      ]
+    }
 
     module ClassMethods
       def field(name, options = {})
@@ -18,19 +25,15 @@ module Mongoid
           options[:avro_format] = case options[:type].to_s
                                   when 'String', 'Symbol' then 'string'
                                   when 'Integer' then 'int'
-                                  when 'Float' then 'float'
+                                  when 'Float' then 'double'
                                   when 'BigDecimal' then 'decimal'
                                   when 'Boolean', 'Mongoid::Boolean' then 'boolean'
-                                  when 'Money'
-                                    # We must define the money record in first
-                                    {
-                                      type: 'record',
-                                      name: 'Money',
-                                      fields: [
-                                        { name: 'cents', type: 'int' },
-                                        { name: 'currency_iso', type: 'string' }
-                                      ]
-                                    }
+                                  when 'Money' #then 'string'
+                                    if ::Mongoid::Avro.avro_money_schema.present?
+                                      'Money'
+                                    else
+                                      ::Mongoid::Avro.avro_money_schema = ::Mongoid::Avro::MONEY_AVRO_SCHEMA
+                                    end
                                   when 'DateTime', 'Time'
                                     {
                                       type: 'long',
@@ -53,7 +56,7 @@ module Mongoid
         super(name, options)
       end
 
-      def generate_avro_schema(ns: nil)
+      def generate_avro_schema
         fields = self.fields.inject([]) do |fields, (name, field)|
           fields << {
             name: name,
@@ -61,12 +64,16 @@ module Mongoid
           }
         end
 
-        ::Avro::Schema.parse({
-          namespace: ns.to_s,
+        schema = ::Avro::Schema.parse({
+          namespace: ::Mongoid::Avro.avro_namespace.to_s,
           type: 'record',
           name: self.to_s,
           fields: fields
         }.to_json)
+
+        Mongoid::Avro.avro_money_schema = nil
+
+        schema
       end
     end
   end

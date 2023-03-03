@@ -33,4 +33,5 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency "mongoid"
   spec.add_dependency "avro"
+  spec.add_dependency "money-rails"
 end

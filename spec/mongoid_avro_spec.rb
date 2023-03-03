@@ -7,42 +7,68 @@ class TestModel
   field :name, type: String
   field :age, type: Integer
   field :height, type: Float
+  field :total, type: Money
+  field :subtotal, type: Money
 end
 
 RSpec.describe Mongoid::Avro do
   describe '.generate_avro_schema' do
-    context 'when avro_format option is not given' do
-      it 'normalizes the field type to avro format' do
-        schema = TestModel.generate_avro_schema(ns: 'ec_core')
+    before(:each) { Mongoid::Avro.avro_namespace = 'ns1' }
+    after(:each) do
+      Mongoid::Avro.avro_namespace = nil
+    end
 
-        expect(schema.name).to eq(TestModel.name)
-        expect(schema.namespace).to eq('ec_core')
-        expect(schema.fields_hash['_id'].type.type_sym).to eq(:string)
-        expect(schema.fields_hash['name'].type.type_sym).to eq(:string)
-        expect(schema.fields_hash['age'].type.type_sym).to eq(:int)
-        expect(schema.fields_hash['height'].type.type_sym).to eq(:float)
+    context 'when avro_format option is not given' do
+      it 'normalizes the field type to default avro format' do
+        schema = TestModel.generate_avro_schema.to_avro
+
+        expect(schema['type']).to eq('record')
+        expect(schema['name']).to eq('TestModel')
+        expect(schema['namespace']).to eq('ns1')
+        expect(schema['fields'].detect { |field| field['name'] == '_id' }.fetch('type')).to eq('string')
+        expect(schema['fields'].detect { |field| field['name'] == 'name' }.fetch('type')).to eq('string')
+        expect(schema['fields'].detect { |field| field['name'] == 'age' }.fetch('type')).to eq('int')
+        expect(schema['fields'].detect { |field| field['name'] == 'height' }.fetch('type')).to eq('double')
+        expect(schema['fields'].detect { |field| field['name'] == 'total' }.fetch('type')).to include(
+          {
+            'type' => 'record',
+            'name' => 'Money',
+            'namespace' => 'ns1',
+            'fields' => [
+              { 'name' => 'cents', 'type' => 'int'},
+              { 'name' => 'currency_iso', 'type' => 'string'}
+            ]
+          }
+        )
+        expect(schema['fields'].detect { |field| field['name'] == 'subtotal' }.fetch('type')).to eq('ns1.Money')
       end
     end
 
     context 'when avro_format option is given' do
-      class TestModel
+      before(:each) { Mongoid::Avro.avro_namespace = 'ns2' }
+      after(:each) do
+        Mongoid::Avro.avro_namespace = nil
+      end
+
+      class TestModel2
         include Mongoid::Document
         include Mongoid::Avro
 
         field :name, type: String, avro_format: :string
-        field :age, type: Integer, avro_format: :int
-        field :height, type: Float, avro_format: :double
+        field :age, type: Integer, avro_format: :long
+        field :height, type: Float, avro_format: :float
       end
 
       it 'normalizes the field type to the given avro format' do
-        schema = TestModel.generate_avro_schema
+        schema = TestModel2.generate_avro_schema.to_avro
 
-        expect(schema.name).to eq(TestModel.name)
-        expect(schema.namespace).to eq('')
-        expect(schema.fields_hash['_id'].type.type_sym).to eq(:string)
-        expect(schema.fields_hash['name'].type.type_sym).to eq(:string)
-        expect(schema.fields_hash['age'].type.type_sym).to eq(:int)
-        expect(schema.fields_hash['height'].type.type_sym).to eq(:double)
+        expect(schema['type']).to eq('record')
+        expect(schema['name']).to eq('TestModel2')
+        expect(schema['namespace']).to eq('ns2')
+        expect(schema['fields'].detect { |field| field['name'] == '_id' }.fetch('type')).to eq('string')
+        expect(schema['fields'].detect { |field| field['name'] == 'name' }.fetch('type')).to eq('string')
+        expect(schema['fields'].detect { |field| field['name'] == 'age' }.fetch('type')).to eq('long')
+        expect(schema['fields'].detect { |field| field['name'] == 'height' }.fetch('type')).to eq('float')
       end
     end
   end
