@@ -22,12 +22,34 @@ module Mongoid
 
     module ClassMethods
       def generate_avro_schema(namespace:)
-        fields = self.fields.inject([]) do |fields, (name, field)|
-          # Convert default field type to avro format unless options[:avro_format] is given
+        fields = convert_to_fields(self)
+        # Handle embedded documents
+        relations
+          .select { |_field, relation| relation.instance_of?(::Mongoid::Association::Embedded::EmbedsMany) }
+          .each do |_field, relation|
+          klass = relation.options.fetch(:class_name, relation.name.to_s.camelize).classify.constantize
+          _fields = convert_to_fields(klass)
 
           fields << {
-            name: name,
-            type: field.options[:avro_format] || convert_to_avro_format(type: field.options[:type])
+            name: relation.name,
+            type: {
+              type: "array",
+              items: _fields
+            }
+          }
+        end
+
+        # Handle embedded document
+        relations
+          .select { |_field, relation| relation.instance_of?(::Mongoid::Association::Embedded::EmbedsOne) }
+          .each do |_field, relation|
+          klass = relation.options.fetch(:class_name, relation.name.to_s.camelize).classify.constantize
+          _fields = convert_to_fields(klass)
+
+          fields << {
+            name: relation.name,
+            type: "record",
+            fields: _fields
           }
         end
 
@@ -41,6 +63,16 @@ module Mongoid
         Mongoid::Avro.avro_money_schema = nil
 
         schema
+      end
+
+      def convert_to_fields(klass)
+        # Convert default field type to avro format unless options[:avro_format] is given
+        klass.fields.inject([]) do |fields, (name, field)|
+          fields << {
+            name: name,
+            type: field.options[:avro_format] || convert_to_avro_format(type: field.options[:type])
+          }
+        end
       end
 
       def convert_to_avro_format(type:)

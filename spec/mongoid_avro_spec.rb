@@ -4,83 +4,92 @@ require "spec_helper"
 
 class TestModel
   include Mongoid::Document
-  include Mongoid::Timestamps
+  include Mongoid::Timestamps::Created
   include Mongoid::Avro
 
   field :name, type: String
+  field :nickname, type: String, avro_format: :string
   field :age, type: Integer
+  field :balance, type: Integer, avro_format: :long
   field :height, type: Float
+  field :weight, type: Float, avro_format: :float
   field :total, type: Money
   field :subtotal, type: Money
+  field :updated_at, type: Time, avro_format: {
+    type: "long",
+    logicalType: "timestamp-micros"
+  }
 end
 
 RSpec.describe Mongoid::Avro do
   describe ".generate_avro_schema" do
-    let(:namespace) { "ns1" }
-    context "when avro_format option is not given" do
-      it "normalizes the field type to default avro format" do
-        schema = TestModel.generate_avro_schema(namespace: "ns1").to_avro
+    subject { TestModel.generate_avro_schema(namespace: "ns1").to_avro }
 
-        expect(schema["type"]).to eq("record")
-        expect(schema["name"]).to eq("TestModel")
-        expect(schema["namespace"]).to eq("ns1")
-        expect(schema["fields"].detect { |field| field["name"] == "_id" }.fetch("type")).to eq("string")
-        expect(schema["fields"].detect { |field| field["name"] == "created_at" }.fetch("type")).to eq(
-          {
-            "type" => "long",
-            "logicalType" => "timestamp-millis"
-          }
-        )
-        expect(schema["fields"].detect { |field| field["name"] == "name" }.fetch("type")).to eq("string")
-        expect(schema["fields"].detect { |field| field["name"] == "age" }.fetch("type")).to eq("int")
-        expect(schema["fields"].detect { |field| field["name"] == "height" }.fetch("type")).to eq("double")
-        expect(schema["fields"].detect { |field| field["name"] == "total" }.fetch("type")).to include(
-          {
-            "type" => "record",
-            "name" => "Money",
-            "namespace" => "ns1",
-            "fields" => [
-              { "name" => "cents", "type" => "int" },
-              { "name" => "currency_iso", "type" => "string" }
-            ]
-          }
-        )
-        expect(schema["fields"].detect { |field| field["name"] == "subtotal" }.fetch("type")).to eq("ns1.Money")
-      end
+    it "use class name as default schema name" do
+      expect(subject["name"]).to eq("TestModel")
+      expect(subject["type"]).to eq("record")
+    end
+
+    it "use given namespace as namespace" do
+      expect(subject["namespace"]).to eq("ns1")
+    end
+
+    it "convert default _id to string" do
+      expect(subject["fields"].detect { |field| field["name"] == "_id" }.fetch("type")).to eq("string")
+    end
+
+    it "convert default timestamp to type: long and logicalType: timestamp-millis" do
+      expect(subject["fields"].detect { |field| field["name"] == "created_at" }.fetch("type")).to eq(
+        {
+          "type" => "long",
+          "logicalType" => "timestamp-millis"
+        }
+      )
+    end
+
+    it "convert default string to string" do
+      expect(subject["fields"].detect { |field| field["name"] == "name" }.fetch("type")).to eq("string")
+    end
+
+    it "convert default Integer to int" do
+      expect(subject["fields"].detect { |field| field["name"] == "age" }.fetch("type")).to eq("int")
+    end
+
+    it "convert default Float to double" do
+      expect(subject["fields"].detect { |field| field["name"] == "height" }.fetch("type")).to eq("double")
+    end
+
+    it "shows custom type of Money" do
+      expect(subject["fields"].detect { |field| field["name"] == "total" }.fetch("type")).to include(
+        {
+          "type" => "record",
+          "name" => "Money",
+          "namespace" => "ns1",
+          "fields" => [
+            { "name" => "cents", "type" => "int" },
+            { "name" => "currency_iso", "type" => "string" }
+          ]
+        }
+      )
     end
 
     context "when avro_format option is given" do
-      let(:namespace) { "ns2" }
-      class TestModel2
-        include Mongoid::Document
-        include Mongoid::Timestamps
-        include Mongoid::Avro
-
-        field :created_at, type: Time, avro_format: {
-          type: "long",
-          logicalType: "timestamp-micros"
-        }
-        field :name, type: String, avro_format: :string
-        field :age, type: Integer, avro_format: :long
-        field :height, type: Float, avro_format: :float
-      end
-
-      it "normalizes the field type to the given avro format" do
-        schema = TestModel2.generate_avro_schema(namespace: namespace).to_avro
-
-        expect(schema["type"]).to eq("record")
-        expect(schema["name"]).to eq("TestModel2")
-        expect(schema["namespace"]).to eq("ns2")
-        expect(schema["fields"].detect { |field| field["name"] == "_id" }.fetch("type")).to eq("string")
-        expect(schema["fields"].detect { |field| field["name"] == "created_at" }.fetch("type")).to eq(
+      it "shows given arvo_format of the field" do
+        expect(subject["fields"].detect { |field| field["name"] == "nickname" }.fetch("type")).to eq("string")
+        expect(subject["fields"].detect { |field| field["name"] == "balance" }.fetch("type")).to eq("long")
+        expect(subject["fields"].detect { |field| field["name"] == "weight" }.fetch("type")).to eq("float")
+        expect(subject["fields"].detect { |field| field["name"] == "updated_at" }.fetch("type")).to eq(
           {
             "type" => "long",
             "logicalType" => "timestamp-micros"
           }
         )
-        expect(schema["fields"].detect { |field| field["name"] == "name" }.fetch("type")).to eq("string")
-        expect(schema["fields"].detect { |field| field["name"] == "age" }.fetch("type")).to eq("long")
-        expect(schema["fields"].detect { |field| field["name"] == "height" }.fetch("type")).to eq("float")
+      end
+    end
+
+    context "when there exists more than one Money fields" do
+      it "shows custom type of Money which defined under the namespace" do
+        expect(subject["fields"].detect { |field| field["name"] == "subtotal" }.fetch("type")).to eq("ns1.Money")
       end
     end
   end
