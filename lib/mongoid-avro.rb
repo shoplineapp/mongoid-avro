@@ -48,8 +48,11 @@ module Mongoid
 
           fields << {
             name: relation.name,
-            type: "record",
-            fields: _fields
+            type: {
+              type: "record",
+              name: relation.name,
+              fields: _fields
+            }
           }
         end
 
