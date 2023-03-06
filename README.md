@@ -7,13 +7,13 @@
 ## Installation
 
 Add mongoid-avro to your Gemfile:
-```
+```ruby
 gem 'mongoid-avro'
 ```
 
 And then execute:
 
-```
+```ruby
 bundle install
 ```
 
@@ -21,7 +21,7 @@ bundle install
 ## Usage
 
 1. Include Mongoid::Avro in your Mongoid model:
-```
+```ruby
 class MyModel
   include Mongoid::Document
   include Mongoid::Avro
@@ -30,7 +30,7 @@ end
 ```
 2. Optionally, specify the Avro format for each field using the avro_format option:
 
-```
+```ruby
 class MyModel
   include Mongoid::Document
   include Mongoid::Avro
@@ -46,22 +46,22 @@ class MyModel
     }
   # ...
 end
-
 ```
 The avro_format option can be a string, symbol, or hash.
 
 3. To generate the Avro schema for your model, call generate_avro_schema:
 
-```
+```ruby
 schema = MyModel.generate_avro_schema(namespace: 'my.namespace')
 ```
 
 You can pass an optional namespace parameter to specify the namespace for the Avro schema.
 
 The method returns an `Avro::Schema`.
+
 4. (Optional) Generate avro schema to json
-```
-schema.to_avro
+```ruby
+schema.to_avro.to_json
 ```
 
 ## Contributing
