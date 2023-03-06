@@ -2,6 +2,7 @@ require 'spec_helper'
 
 class TestModel
   include Mongoid::Document
+  include Mongoid::Timestamps
   include Mongoid::Avro
 
   field :name, type: String
@@ -22,6 +23,12 @@ RSpec.describe Mongoid::Avro do
         expect(schema['name']).to eq('TestModel')
         expect(schema['namespace']).to eq('ns1')
         expect(schema['fields'].detect { |field| field['name'] == '_id' }.fetch('type')).to eq('string')
+        expect(schema['fields'].detect { |field| field['name'] == 'created_at' }.fetch('type')).to eq(
+          {
+            "type"=>"long",
+            "logicalType"=>"timestamp-millis"
+          }
+        )
         expect(schema['fields'].detect { |field| field['name'] == 'name' }.fetch('type')).to eq('string')
         expect(schema['fields'].detect { |field| field['name'] == 'age' }.fetch('type')).to eq('int')
         expect(schema['fields'].detect { |field| field['name'] == 'height' }.fetch('type')).to eq('double')
@@ -44,8 +51,13 @@ RSpec.describe Mongoid::Avro do
       let(:namespace) { 'ns2' }
       class TestModel2
         include Mongoid::Document
+        include Mongoid::Timestamps
         include Mongoid::Avro
 
+        field :created_at, type: Time, avro_format: {
+          type: 'long',
+          logicalType: 'timestamp-micros'
+        }
         field :name, type: String, avro_format: :string
         field :age, type: Integer, avro_format: :long
         field :height, type: Float, avro_format: :float
@@ -58,6 +70,12 @@ RSpec.describe Mongoid::Avro do
         expect(schema['name']).to eq('TestModel2')
         expect(schema['namespace']).to eq('ns2')
         expect(schema['fields'].detect { |field| field['name'] == '_id' }.fetch('type')).to eq('string')
+        expect(schema['fields'].detect { |field| field['name'] == 'created_at' }.fetch('type')).to eq(
+          {
+            "type"=>"long",
+            "logicalType"=>"timestamp-micros"
+          }
+        )
         expect(schema['fields'].detect { |field| field['name'] == 'name' }.fetch('type')).to eq('string')
         expect(schema['fields'].detect { |field| field['name'] == 'age' }.fetch('type')).to eq('long')
         expect(schema['fields'].detect { |field| field['name'] == 'height' }.fetch('type')).to eq('float')
