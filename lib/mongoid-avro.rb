@@ -68,9 +68,9 @@ module Mongoid
           fields: fields
         }.to_json)
 
-        Mongoid::Avro.avro_money_schema = nil
-
         schema
+      ensure
+        Mongoid::Avro.avro_money_schema = nil
       end
 
       def convert_to_fields(klass)
