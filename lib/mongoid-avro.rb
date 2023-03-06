@@ -34,7 +34,12 @@ module Mongoid
             name: relation.name,
             type: {
               type: "array",
-              items: _fields
+              name: relation.name,
+              items: {
+                type: "record",
+                name: relation.name,
+                fields: _fields
+              }
             }
           }
         end
