@@ -31,7 +31,7 @@ Gem::Specification.new do |spec|
   spec.executables = spec.files.grep(%r{\Aexe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
 
-  spec.add_dependency "mongoid"
   spec.add_dependency "avro"
   spec.add_dependency "money-rails"
+  spec.add_dependency "mongoid"
 end

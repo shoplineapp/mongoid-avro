@@ -1,17 +1,17 @@
 # frozen_string_literal: true
 
-ENV['RUBY_ENV'] = 'test'
+ENV["RUBY_ENV"] = "test"
 
-require 'rubygems'
-require 'bundler/setup'
+require "rubygems"
+require "bundler/setup"
 require "pry-byebug"
 require "mongoid"
 require "mongoid-avro"
 require "rspec"
 
 Mongoid.load!(
-  File.join(Dir.pwd, 'spec', 'config', 'mongoid.yml'),
-  ENV['RUBY_ENV'],
+  File.join(Dir.pwd, "spec", "config", "mongoid.yml"),
+  ENV["RUBY_ENV"]
 )
 
 Bundler.require(:default, :test)

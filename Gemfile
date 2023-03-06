@@ -11,8 +11,8 @@ gem "rspec", "~> 3.0"
 
 gem "rubocop", "~> 1.21"
 
-gem 'avro'
-gem 'mongoid'
-gem 'pry-byebug'
-gem 'activesupport'
-gem 'money-rails'
+gem "activesupport"
+gem "avro"
+gem "money-rails"
+gem "mongoid"
+gem "pry-byebug"
