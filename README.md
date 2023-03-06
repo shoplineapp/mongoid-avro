@@ -1,37 +1,73 @@
 # Mongoid::Avro
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/mongoid/avro`. To experiment with that code, run `bin/console` for an interactive prompt.
+`mongoid-avro` is a Ruby gem that allows you to convert a `Mongoid` Model schema to an Avro schema. This can be useful if you want to use Avro serialization with your Mongoid data.
 
-TODO: Delete this and the text above, and describe your gem
+
 
 ## Installation
 
-Install the gem and add to the application's Gemfile by executing:
+Add mongoid-avro to your Gemfile:
+```
+gem 'mongoid-avro'
+```
 
-    $ bundle add mongoid-avro
+And then execute:
 
-If bundler is not being used to manage dependencies, install the gem by executing:
+```
+bundle install
+```
 
-    $ gem install mongoid-avro
 
 ## Usage
 
-TODO: Write usage instructions here
+1. Include Mongoid::Avro in your Mongoid model:
+```
+class MyModel
+  include Mongoid::Document
+  include Mongoid::Avro
+  # ...
+end
+```
+2. Optionally, specify the Avro format for each field using the avro_format option:
 
-## Development
+```
+class MyModel
+  include Mongoid::Document
+  include Mongoid::Avro
 
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+  field :my_field, type: String, avro_format: 'my_custom_format'
+  field :my_field_2, type: String, avro_format: {
+      type: 'record',
+      name: 'Money',
+      fields: [
+        { name: 'cents', type: 'int' },
+        { name: 'currency_iso', type: 'string' }
+      ]
+    }
+  # ...
+end
 
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and the created tag, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+```
+The avro_format option can be a string, symbol, or hash.
+
+3. To generate the Avro schema for your model, call generate_avro_schema:
+
+```
+schema = MyModel.generate_avro_schema(namespace: 'my.namespace')
+```
+
+You can pass an optional namespace parameter to specify the namespace for the Avro schema.
+
+The method returns an `Avro::Schema`.
+4. (Optional) Generate avro schema to json
+```
+schema.to_avro
+```
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/mongoid-avro. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [code of conduct](https://github.com/[USERNAME]/mongoid-avro/blob/master/CODE_OF_CONDUCT.md).
+Bug reports and pull requests are welcome on GitHub at https://github.com/shoplineapp/mongoid-avro.
 
 ## License
 
 The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
-
-## Code of Conduct
-
-Everyone interacting in the Mongoid::Avro project's codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/[USERNAME]/mongoid-avro/blob/master/CODE_OF_CONDUCT.md).
