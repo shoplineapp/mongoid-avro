@@ -13,14 +13,10 @@ end
 
 RSpec.describe Mongoid::Avro do
   describe '.generate_avro_schema' do
-    before(:each) { Mongoid::Avro.avro_namespace = 'ns1' }
-    after(:each) do
-      Mongoid::Avro.avro_namespace = nil
-    end
-
+    let(:namespace) { 'ns1' }
     context 'when avro_format option is not given' do
       it 'normalizes the field type to default avro format' do
-        schema = TestModel.generate_avro_schema.to_avro
+        schema = TestModel.generate_avro_schema(namespace: 'ns1').to_avro
 
         expect(schema['type']).to eq('record')
         expect(schema['name']).to eq('TestModel')
@@ -45,11 +41,7 @@ RSpec.describe Mongoid::Avro do
     end
 
     context 'when avro_format option is given' do
-      before(:each) { Mongoid::Avro.avro_namespace = 'ns2' }
-      after(:each) do
-        Mongoid::Avro.avro_namespace = nil
-      end
-
+      let(:namespace) { 'ns2' }
       class TestModel2
         include Mongoid::Document
         include Mongoid::Avro
@@ -60,7 +52,7 @@ RSpec.describe Mongoid::Avro do
       end
 
       it 'normalizes the field type to the given avro format' do
-        schema = TestModel2.generate_avro_schema.to_avro
+        schema = TestModel2.generate_avro_schema(namespace: namespace).to_avro
 
         expect(schema['type']).to eq('record')
         expect(schema['name']).to eq('TestModel2')
