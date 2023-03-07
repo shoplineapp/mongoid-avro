@@ -21,14 +21,14 @@ module Mongoid
     }.freeze
 
     module ClassMethods
-      def generate_avro_schema(namespace:)
-        fields = convert_to_fields(self)
+      def generate_avro_schema(namespace:, optional: true)
+        fields = convert_to_fields(self, optional: optional)
         # Handle embedded documents
         relations
           .select { |_field, relation| relation.instance_of?(::Mongoid::Association::Embedded::EmbedsMany) }
           .each do |_field, relation|
           klass = relation.options.fetch(:class_name, relation.name.to_s.camelize).classify.constantize
-          _fields = convert_to_fields(klass)
+          _fields = convert_to_fields(klass, optional: optional)
 
           fields << {
             name: relation.name,
@@ -49,7 +49,7 @@ module Mongoid
           .select { |_field, relation| relation.instance_of?(::Mongoid::Association::Embedded::EmbedsOne) }
           .each do |_field, relation|
           klass = relation.options.fetch(:class_name, relation.name.to_s.camelize).classify.constantize
-          _fields = convert_to_fields(klass)
+          _fields = convert_to_fields(klass, optional: optional)
 
           fields << {
             name: relation.name,
@@ -73,17 +73,25 @@ module Mongoid
         Mongoid::Avro.avro_money_schema = nil
       end
 
-      def convert_to_fields(klass)
+      def convert_to_fields(klass, optional:)
         # Convert default field type to avro format unless options[:avro_format] is given
         klass.fields.inject([]) do |fields, (name, field)|
+          type = field.options[:avro_format]
+          type ||=
+            if optional && name != '_id'
+              ["null", convert_to_avro_format(type: field.options[:type])]
+            else
+              convert_to_avro_format(type: field.options[:type])
+            end
+
           fields << {
             name: name,
-            type: field.options[:avro_format] || convert_to_avro_format(type: field.options[:type])
-          }
+            type: type
+          }.tap { |f| f[:default] = nil if field.options[:avro_format].nil? && optional && name != '_id' }
         end
       end
 
-      def convert_to_avro_format(type:)
+      def convert_to_avro_format(type: , optional: true)
         case type.to_s
         when "String", "Symbol" then "string"
         when "Integer" then "int"
@@ -108,11 +116,18 @@ module Mongoid
             logicalType: "date"
           }
         when "BSON::ObjectId" then "string"
+        when "Array"
+          {
+            type: "array",
+            items: "string",
+            default: []
+          }
+        when "Hash"
+          # Expect to encode unstructed data to json string
+          "string"
         else
           # If the type is not recognized, raise an error
-          # raise ArgumentError, "Unsupported type for avro_format: #{options[:type]}"
-          # fallback to string anyway
-          "string"
+          raise ArgumentError, "Unsupported type for avro_format: #{options[:type]}"
         end
       end
     end
