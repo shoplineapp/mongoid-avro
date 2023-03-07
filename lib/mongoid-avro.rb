@@ -127,7 +127,7 @@ module Mongoid
           "string"
         else
           # If the type is not recognized, raise an error
-          raise ArgumentError, "Unsupported type for avro_format: #{options[:type]}"
+          raise ArgumentError, "Unsupported type for avro_format: #{type}"
         end
       end
     end
