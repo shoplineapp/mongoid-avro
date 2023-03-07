@@ -76,14 +76,14 @@ module Mongoid
       def convert_to_fields(klass, optional:)
         # Convert default field type to avro format unless options[:avro_format] is given
         klass.fields.inject([]) do |fields, (name, field)|
+          # explicitly assigns avro_format
           type = field.options[:avro_format]
-          type ||=
-            if optional && name != '_id'
-              ["null", convert_to_avro_format(type: field.options[:type])]
-            else
-              convert_to_avro_format(type: field.options[:type])
-            end
-
+          # special case: belongs_to; has_and_belongs_to_many will be an array of strings
+          type = 'string' if field.options[:association].class == Mongoid::Association::Referenced::BelongsTo
+          # implicitly transforms default types
+          type ||= convert_to_avro_format(type: field.options[:type])
+          # If optional, union with null
+          type = ["null", type] if optional && name != '_id'
           fields << {
             name: name,
             type: type
