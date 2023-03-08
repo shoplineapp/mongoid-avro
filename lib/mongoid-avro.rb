@@ -32,15 +32,18 @@ module Mongoid
 
           fields << {
             name: relation.name,
-            type: {
-              type: "array",
-              name: relation.name,
-              items: {
-                type: "record",
+            type: [
+              "null",
+              {
+                type: "array",
                 name: relation.name,
-                fields: _fields
+                items: {
+                  type: "record",
+                  name: relation.name,
+                  fields: _fields
+                }
               }
-            }
+            ]
           }
         end
 
@@ -53,11 +56,14 @@ module Mongoid
 
           fields << {
             name: relation.name,
-            type: {
-              type: "record",
-              name: relation.name,
-              fields: _fields
-            }
+            type: [
+              "null",
+              {
+                type: "record",
+                name: relation.name,
+                fields: _fields
+              }
+            ]
           }
         end
 
