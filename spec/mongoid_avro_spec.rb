@@ -94,7 +94,7 @@ RSpec.describe Mongoid::Avro do
             "name" => "Money",
             "namespace" => "ns1",
             "fields" => [
-              { "name" => "cents", "type" => "int" },
+              { "name" => "cents", "type" => "long" },
               { "name" => "currency_iso", "type" => "string" }
             ]
           }
@@ -148,8 +148,8 @@ RSpec.describe Mongoid::Avro do
             [
               "null",
               {
-              "type" => "long",
-              "logicalType" => "timestamp-millis"
+                "type" => "long",
+                "logicalType" => "timestamp-millis"
               }
             ]
           )
@@ -200,7 +200,7 @@ RSpec.describe Mongoid::Avro do
                 "name" => "Money",
                 "namespace" => "ns1",
                 "fields" => [
-                  { "name" => "cents", "type" => "int" },
+                  { "name" => "cents", "type" => "long" },
                   { "name" => "currency_iso", "type" => "string" }
                 ]
               }

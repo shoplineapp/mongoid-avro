@@ -15,7 +15,7 @@ module Mongoid
       type: "record",
       name: "Money",
       fields: [
-        { name: "cents", type: "int" },
+        { name: "cents", type: "long" },
         { name: "currency_iso", type: "string" }
       ]
     }.freeze
