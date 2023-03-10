@@ -2,7 +2,7 @@
 
 `mongoid-avro` is a Ruby gem that allows you to convert a `Mongoid` Model schema to an Avro schema. This can be useful if you want to use Avro serialization with your Mongoid data.
 
-
+---
 
 ## Installation
 
@@ -16,7 +16,7 @@ And then execute:
 ```ruby
 bundle install
 ```
-
+---
 
 ## Usage
 
@@ -63,6 +63,119 @@ The method returns an `Avro::Schema`.
 ```ruby
 schema.to_avro.to_json
 ```
+---
+## Field type transform login
+### Primitive Types
+
+|Mongoid|Avro|
+|-------|----|
+|_id field|string|
+|Integer|int|
+|Float|double|
+|String|string|
+|Symbol|string|
+|Boolean|boolean|
+|BSON::ObjectId|string|
+
+### Complext Types
+#### DateTime, Time
+```json
+{ "type": "long", "logicalType": "timestamp-millis"}
+```
+#### Date
+```json
+{ "type": "int", "logicalType": "Date"}
+```
+#### Money
+```json
+{
+  "type": "record",
+  "name": "Money",
+  "fields": [
+    {
+      "name": "cents",
+      "type": "long"
+    },
+    {
+      "name": "currency_iso",
+      "type": "string"
+    }
+  ]
+}
+```
+#### Array: `Array of strings`
+```json
+{
+  "type": "array",
+  "items": "string",
+  "default": []
+}
+```
+#### Hash: `string`
+- expected to be serialized as json string
+
+### Embedded document
+#### Embeds One
+```json
+{
+  "name": "unique_address",
+  "type": [
+    "null",
+    {
+      "type": "record",
+      "name": "unique_address",
+      "namespace": "ns1",
+      "fields": [
+        {
+          "name": "_id",
+          "type": "string"
+        },
+        {
+          "name": "address",
+          "type": "string"
+        },
+        {
+          "name": "number",
+          "type": "int"
+        }
+      ]
+    }
+  ]
+}
+```
+#### Embeds Many
+```json
+{
+  "name": "multiple_address",
+  "type": [
+    "null",
+    {
+      "type": "array",
+      "items": {
+        "type": "record",
+        "name": "multiple_address",
+        "namespace": "ns1",
+        "fields": [
+          {
+            "name": "_id",
+            "type": "string"
+          },
+          {
+            "name": "address",
+            "type": "string"
+          },
+          {
+            "name": "number",
+            "type": "int"
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+---
 
 ## Contributing
 
