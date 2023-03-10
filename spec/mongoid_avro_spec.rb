@@ -7,6 +7,9 @@ class TestModel
   include Mongoid::Timestamps::Created
   include Mongoid::Avro
 
+  embeds_one :unique_address, class_name: 'EmbeddedModel'
+  embeds_many :multiple_address, class_name: 'EmbeddedModel'
+
   field :name, type: String
   field :nickname, type: String, avro_format: :string
   field :age, type: Integer
@@ -20,6 +23,15 @@ class TestModel
     type: "long",
     logicalType: "timestamp-micros"
   }
+end
+
+class EmbeddedModel
+  include Mongoid::Document
+
+  embedded_in :test_model
+
+  field :address, type: String
+  field :number, type: Integer
 end
 
 def get_field_by_name(fields, name)
@@ -129,6 +141,66 @@ RSpec.describe Mongoid::Avro do
 
       it "shows custom type of Money which defined under the namespace" do
         expect(field["type"]).to eq("ns1.Money")
+      end
+    end
+
+    context "when associate with embeds_one" do
+      let(:field_name) { "unique_address" }
+
+      it "convert embedded document to record" do
+        expect(field["name"]).to eq("unique_address")
+        expect(field["type"]).to eq([
+          "null",
+          {
+            "type" => "record",
+            "name" => "unique_address",
+            "namespace" => "ns1",
+            "fields" => [
+              {
+                "name" => "_id", "type" => "string"
+              },
+              {
+                "name" => "address", "type" => "string"
+              },
+              {
+                "name" => "number", "type" => "int"
+              }
+            ]
+          }
+        ])
+      end
+    end
+
+    context "when associate with embeds_many" do
+      let(:field_name) { "multiple_address" }
+
+      it "convert embedded document to record" do
+        expect(field["name"]).to eq("multiple_address")
+        expect(field["type"]).to eq([
+          "null",
+          {
+            "type" => "array",
+            "items" => {
+              "type" => "record",
+              "name" => "multiple_address",
+              "namespace" => "ns1",
+              "fields" => [
+                {
+                  "name" => "_id",
+                  "type" => "string"
+                },
+                {
+                  "name" => "address",
+                  "type" => "string"
+                },
+                {
+                  "name" => "number",
+                  "type" => "int"
+                }
+              ]
+            }
+          }
+        ])
       end
     end
 

@@ -23,7 +23,7 @@ module Mongoid
     module ClassMethods
       def generate_avro_schema(namespace:, optional: true)
         fields = convert_to_fields(self, optional: optional)
-        # Handle embedded documents
+        # Handle embedded documents with optional as default
         relations
           .select { |_field, relation| relation.instance_of?(::Mongoid::Association::Embedded::EmbedsMany) }
           .each do |_field, relation|
@@ -47,7 +47,7 @@ module Mongoid
           }
         end
 
-        # Handle embedded document
+        # Handle embedded document with optional as default
         relations
           .select { |_field, relation| relation.instance_of?(::Mongoid::Association::Embedded::EmbedsOne) }
           .each do |_field, relation|
