@@ -174,6 +174,16 @@ schema.to_avro.to_json
   ]
 }
 ```
+### Associations
+#### BelongsTo: `string` as forigen key
+#### HasAndBelongsToMany: same as an `Array`
+```json
+{
+  "type": "array",
+  "items": "string",
+  "default": []
+}
+```
 
 ---
 
