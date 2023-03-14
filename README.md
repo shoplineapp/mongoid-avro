@@ -187,6 +187,19 @@ schema.to_avro.to_json
 
 ---
 
+## Validation
+
+```ruby
+require 'mongoid-avro'
+
+MyModel.include(Mongoid::Avro)
+schema = MyModel.generate_avro_schema(namespace: 'my.namespace')
+model = MyModel.find('id')
+test_data = JSON.parse(model.attributes.to_json)
+Avro::SchemaValidator.validate!(schema, data)
+```
+
+
 ## Contributing
 
 Bug reports and pull requests are welcome on GitHub at https://github.com/shoplineapp/mongoid-avro.
