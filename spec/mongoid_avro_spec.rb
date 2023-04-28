@@ -5,7 +5,6 @@ require "spec_helper"
 class TestModel
   include Mongoid::Document
   include Mongoid::Timestamps::Created
-  include Mongoid::Avro
 
   embeds_one :unique_address, class_name: 'EmbeddedModel'
   embeds_many :multiple_address, class_name: 'EmbeddedModel'
@@ -40,6 +39,8 @@ end
 
 RSpec.describe Mongoid::Avro do
   describe ".generate_avro_schema" do
+    before(:all) { TestModel.include(Mongoid::Avro) }
+
     subject { TestModel.generate_avro_schema(namespace: "ns1", optional: optional).to_avro }
 
     let(:optional) { false }
