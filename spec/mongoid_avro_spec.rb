@@ -9,7 +9,7 @@ class TestModel
   embeds_one :unique_address, class_name: 'EmbeddedModel'
   embeds_many :multiple_address, class_name: 'EmbeddedModel'
 
-  field :name, type: String
+  field :name, type: String, avro_doc: "it's then name of the entity"
   field :nickname, type: String, avro_format: :string
   field :age, type: Integer
   field :balance, type: Integer, avro_format: :long
@@ -78,6 +78,7 @@ RSpec.describe Mongoid::Avro do
 
       it "convert to type: string" do
         expect(field["type"]).to eq("string")
+        expect(field["doc"]).to eq("it's then name of the entity")
       end
     end
 
@@ -158,13 +159,13 @@ RSpec.describe Mongoid::Avro do
             "namespace" => "ns1",
             "fields" => [
               {
-                "name" => "_id", "type" => "string"
+                "doc" => "", "name" => "_id", "type" => "string"
               },
               {
-                "name" => "address", "type" => "string"
+                "doc" => "", "name" => "address", "type" => "string"
               },
               {
-                "name" => "number", "type" => "int"
+                "doc" => "", "name" => "number", "type" => "int"
               }
             ]
           }
@@ -187,14 +188,17 @@ RSpec.describe Mongoid::Avro do
               "namespace" => "ns1",
               "fields" => [
                 {
+                  "doc" => "",
                   "name" => "_id",
                   "type" => "string"
                 },
                 {
+                  "doc" => "",
                   "name" => "address",
                   "type" => "string"
                 },
                 {
+                  "doc" => "",
                   "name" => "number",
                   "type" => "int"
                 }

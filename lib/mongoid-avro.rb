@@ -5,6 +5,9 @@ require "avro"
 Mongoid::Fields.option :avro_format do |model, field, value|
 end
 
+Mongoid::Fields.option :avro_doc do |model, field, value|
+end
+
 module Mongoid
   module Avro
     extend ActiveSupport::Concern
@@ -90,9 +93,11 @@ module Mongoid
           type ||= convert_to_avro_format(type: field.options[:type])
           # If optional, union with null
           type = ["null", type] if optional && name != '_id'
+
           fields << {
             name: name,
-            type: type
+            type: type,
+            doc: field.options.fetch(:avro_doc, "").to_s
           }.tap { |f| f[:default] = nil if field.options[:avro_format].nil? && optional && name != '_id' }
         end
       end
