@@ -33,7 +33,7 @@ module Mongoid
             klass = if relation.options.key?(:class_name)
                       relation.options[:class_name].constantize
                     else
-                      relation.name.to_s.camelize.classify
+                      relation.name.to_s.camelize.classify.constantize
                     end
             _fields = convert_to_fields(klass, optional: optional)
 
@@ -61,7 +61,7 @@ module Mongoid
             klass = if relation.options.key?(:class_name)
               relation.options[:class_name].constantize
             else
-              relation.name.to_s.camelize.classify
+              relation.name.to_s.camelize.classify.constantize
             end
             _fields = convert_to_fields(klass, optional: optional)
 
