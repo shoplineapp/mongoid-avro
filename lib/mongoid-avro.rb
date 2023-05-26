@@ -30,45 +30,53 @@ module Mongoid
         relations
           .select { |_field, relation| relation.instance_of?(::Mongoid::Association::Embedded::EmbedsMany) }
           .each do |_field, relation|
-          klass = relation.options.fetch(:class_name, relation.name.to_s.camelize).classify.constantize
-          _fields = convert_to_fields(klass, optional: optional)
+            klass = if relation.options.key?(:class_name)
+                      relation.options[:class_name].constantize
+                    else
+                      relation.name.to_s.camelize.classify
+                    end
+            _fields = convert_to_fields(klass, optional: optional)
 
-          fields << {
-            name: relation.name,
-            type: [
-              "null",
-              {
-                type: "array",
-                name: relation.name,
-                items: {
-                  type: "record",
+            fields << {
+              name: relation.name,
+              type: [
+                "null",
+                {
+                  type: "array",
                   name: relation.name,
-                  fields: _fields
+                  items: {
+                    type: "record",
+                    name: relation.name,
+                    fields: _fields
+                  }
                 }
-              }
-            ]
-          }
-        end
+              ]
+            }
+          end
 
         # Handle embedded document with optional as default
         relations
           .select { |_field, relation| relation.instance_of?(::Mongoid::Association::Embedded::EmbedsOne) }
           .each do |_field, relation|
-          klass = relation.options.fetch(:class_name, relation.name.to_s.camelize).classify.constantize
-          _fields = convert_to_fields(klass, optional: optional)
+            klass = if relation.options.key?(:class_name)
+              relation.options[:class_name].constantize
+            else
+              relation.name.to_s.camelize.classify
+            end
+            _fields = convert_to_fields(klass, optional: optional)
 
-          fields << {
-            name: relation.name,
-            type: [
-              "null",
-              {
-                type: "record",
-                name: relation.name,
-                fields: _fields
-              }
-            ]
-          }
-        end
+            fields << {
+              name: relation.name,
+              type: [
+                "null",
+                {
+                  type: "record",
+                  name: relation.name,
+                  fields: _fields
+                }
+              ]
+            }
+          end
 
         schema = ::Avro::Schema.parse({
           namespace: namespace,
