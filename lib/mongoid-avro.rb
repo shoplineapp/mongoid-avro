@@ -81,7 +81,7 @@ module Mongoid
         schema = ::Avro::Schema.parse({
           namespace: namespace,
           type: "record",
-          name: to_s,
+          name: self.to_s.split('::').map(&:underscore).join('_'),
           fields: fields
         }.to_json)
 
