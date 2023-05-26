@@ -48,7 +48,7 @@ RSpec.describe Mongoid::Avro do
     let(:field_name) { "_id" }
 
     it "use class name as default schema name" do
-      expect(subject["name"]).to eq("TestModel")
+      expect(subject["name"]).to eq("test_model")
       expect(subject["type"]).to eq("record")
     end
 
@@ -108,7 +108,7 @@ RSpec.describe Mongoid::Avro do
             "name" => "Money",
             "namespace" => "ns1",
             "fields" => [
-              { "name" => "cents", "type" => "long" },
+              { "name" => "cents", "type" => "double" },
               { "name" => "currency_iso", "type" => "string" }
             ]
           }
@@ -277,7 +277,7 @@ RSpec.describe Mongoid::Avro do
                 "name" => "Money",
                 "namespace" => "ns1",
                 "fields" => [
-                  { "name" => "cents", "type" => "long" },
+                  { "name" => "cents", "type" => "double" },
                   { "name" => "currency_iso", "type" => "string" }
                 ]
               }

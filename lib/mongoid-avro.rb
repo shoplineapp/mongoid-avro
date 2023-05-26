@@ -18,7 +18,7 @@ module Mongoid
       type: "record",
       name: "Money",
       fields: [
-        { name: "cents", type: "long" },
+        { name: "cents", type: "double" },
         { name: "currency_iso", type: "string" }
       ]
     }.freeze
@@ -117,7 +117,7 @@ module Mongoid
         when "Float" then "double"
         when "BigDecimal" then "decimal"
         when "Boolean", "Mongoid::Boolean" then "boolean"
-        when "Money"
+        when "Money", "PreciseMoney"
           # The named record in avro is unique.
           if ::Mongoid::Avro.avro_money_schema.present?
             "Money"
