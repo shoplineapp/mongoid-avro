@@ -77,7 +77,7 @@ schema.to_avro.to_json
 |Boolean|boolean|
 |BSON::ObjectId|string|
 
-### Complext Types
+### Complex Types
 #### DateTime, Time
 ```json
 { "type": "long", "logicalType": "timestamp-millis"}
@@ -94,7 +94,7 @@ schema.to_avro.to_json
   "fields": [
     {
       "name": "cents",
-      "type": "long"
+      "type": "double"
     },
     {
       "name": "currency_iso",
