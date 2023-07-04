@@ -1,17 +1,21 @@
 # Mongoid::Avro
 
-`mongoid-avro` is a Ruby gem that allows you to convert a `Mongoid` Model schema to an Avro schema. This can be useful if you want to use Avro serialization with your Mongoid data.
+The `mongoid-avro` is a Ruby gem that allows you to convert a `Mongoid` Model schema into an Avro schema. This can be useful if you want to use Avro serialization with your Mongoid data.
+
 
 ---
 
 ## Installation
 
-Add mongoid-avro to your Gemfile:
+To install mongoid-avro, add it to your Gemfile:
+
 ```ruby
 gem 'mongoid-avro'
 ```
 
-And then execute:
+Then, execute the following command:
+
+
 
 ```ruby
 bundle install
@@ -28,7 +32,7 @@ class MyModel
   # ...
 end
 ```
-2. Optionally, specify the Avro format for each field using the avro_format option:
+2. Optionally, you can specify the Avro format for each field using the `avro_format` option:
 
 ```ruby
 class MyModel
@@ -47,22 +51,37 @@ class MyModel
   # ...
 end
 ```
-The avro_format option can be a string, symbol, or hash.
+The `avro_format` option can be a `String`, `Symbol`, or `Hash`.
 
-3. To generate the Avro schema for your model, call generate_avro_schema:
+2. Optionally, you can specify the `avro_doc` option to add a description of the field. It will be used as the `doc` of the field.
+
+
+```ruby
+class Person
+  include Mongoid::Document
+  include Mongoid::Avro
+
+  field :unique_name, type: String, avro_doc: 'The name of the person which is unique.'
+end
+```
+
+3. To generate the Avro schema for your model, call the `.generate_avro_schema method` :
+
 
 ```ruby
 schema = MyModel.generate_avro_schema(namespace: 'my.namespace')
 ```
 
-You can pass an optional namespace parameter to specify the namespace for the Avro schema.
+You can pass an optional namespace parameter to specify the namespace for the Avro schema. The method returns an `Avro::Schema` object.
+
 
 The method returns an `Avro::Schema`.
 
-4. (Optional) Generate avro schema to json
+4. (Optional) Generate Avro schema as JSON:
 ```ruby
 schema.to_avro.to_json
 ```
+
 ---
 ## Field type transform login
 ### Primitive Types
@@ -112,7 +131,7 @@ schema.to_avro.to_json
 }
 ```
 #### Hash: `string`
-- expected to be serialized as json string
+- Expected to be serialized as a JSON string.
 
 ### Embedded document
 #### Embeds One
