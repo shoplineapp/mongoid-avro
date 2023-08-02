@@ -10,3 +10,7 @@
 
 - Support generate avro schema from mongoid model
 - support `avro_format` and `avro_doc`
+
+## [1.1.0] - 2023-08-03
+
+- add default `null` on embedded document
