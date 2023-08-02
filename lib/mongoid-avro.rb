@@ -50,7 +50,8 @@ module Mongoid
                     fields: _fields
                   }
                 }
-              ]
+              ],
+              default: nil
             }
           end
 
@@ -74,7 +75,8 @@ module Mongoid
                   name: relation.name,
                   fields: _fields
                 }
-              ]
+              ],
+              default: nil
             }
           end
 
