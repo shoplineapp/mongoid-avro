@@ -131,7 +131,12 @@ schema.to_avro.to_json
 }
 ```
 #### Hash: `string`
-- Expected to be serialized as a JSON string.
+```json
+{
+  "type": "string",
+  "logicalType": "json"
+}
+```
 
 ### Embedded document
 #### Embeds One
