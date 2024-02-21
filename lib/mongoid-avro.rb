@@ -144,8 +144,10 @@ module Mongoid
             default: []
           }
         when "Hash"
-          # Expect to encode unstructed data to json string
-          "string"
+          {
+            "type": "string",
+            "logicalType": "json"
+          }
         else
           # If the type is not recognized, raise an error
           raise ArgumentError, "Unsupported type for avro_format: #{type}"

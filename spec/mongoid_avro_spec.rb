@@ -119,8 +119,13 @@ RSpec.describe Mongoid::Avro do
     context "when default type is Hash" do
       let(:field_name) { "object" }
 
-      it "convert to type: string" do
-        expect(field["type"]).to eq("string")
+      it "convert to type: string and logicalType: json" do
+        expect(field["type"]).to eq(
+          {
+            "logicalType" => "json",
+            "type" => "string"
+          }
+        )
       end
     end
 
@@ -260,8 +265,16 @@ RSpec.describe Mongoid::Avro do
       context "when default type is Hash" do
         let(:field_name) { "object" }
 
-        it "convert to type: string" do
-          expect(field["type"]).to eq(["null", "string"])
+        it "convert to null or type: string with logicalType: json" do
+          expect(field["type"]).to eq(
+            [
+              "null",
+              {
+                "logicalType" => "json",
+                "type" => "string"
+              }
+            ]
+        )
         end
       end
 
