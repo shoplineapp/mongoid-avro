@@ -18,6 +18,7 @@ class TestModel
   field :total, type: Money
   field :subtotal, type: Money
   field :object, type: Hash
+  field :decimal128, type: BSON::Decimal128
   field :updated_at, type: Time, avro_format: {
     type: "long",
     logicalType: "timestamp-micros"
@@ -58,6 +59,14 @@ RSpec.describe Mongoid::Avro do
 
     it "convert object _id to string" do
       expect(field["type"]).to eq("string")
+    end
+
+    context "when default type is BSON::Decimal128" do
+      let(:field_name) { "decimal128" }
+
+      it "convert decimal 128 to string" do
+        expect(field["type"]).to eq("string")
+      end
     end
 
     context "when default type is Time" do

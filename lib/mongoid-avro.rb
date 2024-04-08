@@ -114,7 +114,7 @@ module Mongoid
 
       def convert_to_avro_format(type: , optional: true)
         case type.to_s
-        when "String", "Symbol" then "string"
+        when "String", "Symbol", "BSON::Decimal128" then "string"
         when "Integer" then "int"
         when "Float" then "double"
         when "BigDecimal" then "decimal"
