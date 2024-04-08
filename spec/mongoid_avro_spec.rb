@@ -65,7 +65,12 @@ RSpec.describe Mongoid::Avro do
       let(:field_name) { "decimal128" }
 
       it "convert decimal 128 to string" do
-        expect(field["type"]).to eq("string")
+        expect(field["type"]).to eq(
+          {
+            "type" => "string",
+            "logicalType" => "decimal"
+          }
+        )
       end
     end
 
